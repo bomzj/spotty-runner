@@ -52,7 +52,7 @@ TextureImporter:
         y: 6
         width: 178
         height: 207
-      alignment: 0
+      alignment: 6
       pivot: {x: 0, y: 0}
     - name: giraffe_1
       rect:
@@ -61,7 +61,7 @@ TextureImporter:
         y: 1
         width: 178
         height: 327
-      alignment: 0
+      alignment: 6
       pivot: {x: 0, y: 0}
     - name: giraffe_2
       rect:
@@ -70,7 +70,7 @@ TextureImporter:
         y: 0
         width: 180
         height: 447
-      alignment: 0
+      alignment: 6
       pivot: {x: 0, y: 0}
   spritePackingTag: 
   userData: 

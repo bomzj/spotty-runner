@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Assets.Scripts.Framework;
 
 public class RecycleByBoundary : MonoBehaviour 
 {

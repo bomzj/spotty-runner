@@ -4,11 +4,11 @@ using System.Collections;
 public class IntroController : MonoBehaviour {
 
     public float delayBeforeFadeOut = 2f;
-    SceneFadeInOut sceneFadeInOut;
+    FadeScene sceneFadeInOut;
 
 	// Use this for initialization
 	void Start () {
-        sceneFadeInOut = GameObject.FindObjectOfType<SceneFadeInOut>();
+        sceneFadeInOut = GameObject.FindObjectOfType<FadeScene>();
         sceneFadeInOut.FadeToClearCompleted += sceneFadeInOut_FadeToClearCompleted;
         sceneFadeInOut.FadeToBlackCompleted += sceneFadeInOut_FadeToBlackCompleted;
 	}
