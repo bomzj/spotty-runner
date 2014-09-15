@@ -48,28 +48,55 @@ TextureImporter:
     - name: giraffe_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 6
-        width: 178
-        height: 207
+        x: 52
+        y: 337
+        width: 75
+        height: 79
       alignment: 6
       pivot: {x: 0, y: 0}
     - name: giraffe_1
       rect:
         serializedVersion: 2
-        x: 187
-        y: 1
-        width: 178
-        height: 327
+        x: 150
+        y: 341
+        width: 76
+        height: 79
       alignment: 6
       pivot: {x: 0, y: 0}
     - name: giraffe_2
       rect:
         serializedVersion: 2
-        x: 368
+        x: 239
+        y: 344
+        width: 72
+        height: 79
+      alignment: 6
+      pivot: {x: 0, y: 0}
+    - name: giraffe_3
+      rect:
+        serializedVersion: 2
+        x: 316
         y: 0
-        width: 180
+        width: 150
         height: 447
+      alignment: 6
+      pivot: {x: 0, y: 0}
+    - name: giraffe_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 10
+        width: 150
+        height: 207
+      alignment: 6
+      pivot: {x: 0, y: 0}
+    - name: giraffe_5
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 4
+        width: 151
+        height: 328
       alignment: 6
       pivot: {x: 0, y: 0}
   spritePackingTag: 

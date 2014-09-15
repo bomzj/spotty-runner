@@ -9,15 +9,25 @@ public class Giraffe : MonoBehaviour
 {
     private const float LowHeadColliderY = 1.3f;
     private const float SpanBetweenHeadCollidersByY = 1.2f;
+    
+    private const float LowMouthY = 0.9508762f;
+    private const float MiddleMouthY = 2.176f;
+    private const float HighMouthY = 3.355f;
 
     public Sprite highGiraffe;
     public Sprite middleGiraffe;
     public Sprite lowGiraffe;
+    
+    public Sprite smileMouth;
+    public Sprite eatingMouth;
 
     private GiraffeHeight currentGiraffeHeight = GiraffeHeight.Low;
 
     private SpriteRenderer bodyRenderer;
-    private BoxCollider2D headCollider;
+    private BoxCollider2D mouthCollider;
+    private BoxCollider2D preMouthCollider;
+    private Transform mouth;
+    private Animator animator;
 
     private GameController gameController;
     private ScoreBar ScoreBar;
@@ -25,21 +35,35 @@ public class Giraffe : MonoBehaviour
 	// Use this for initialization
 	void Start () 
     {
-        // GameController
+        // Set reference to GameController
         gameController = GameObject.FindWithTag("GameController").GetComponent<GameController>();
-
-        // ScoreBar 
+        gameController.GamePlayStateChanged += gameController_GamePlayStateChanged;
+        
+        // Set reference to ScoreBar 
         ScoreBar = GameObject.Find("Score Bar").GetComponent<ScoreBar>();
 
+        // Initialize Giraffe properties
         var body = transform.Find("Body");
         bodyRenderer = body.GetComponent<SpriteRenderer>();
-        
-        //var head = transform.Find("Head");
-        //headCollider = head.GetComponent<BoxCollider2D>();
-        headCollider = GetComponent<BoxCollider2D>();
+
+        mouth = body.Find("Mouth").transform;
+        mouthCollider = GetComponent<BoxCollider2D>();
+
+        var preMouth = body.Find("PreMouth").transform;
+        preMouthCollider = preMouth.GetComponent<BoxCollider2D>();
+ 
+        animator = GetComponent<Animator>();
 
         SetGiraffeHeight(currentGiraffeHeight);
 	}
+
+    void gameController_GamePlayStateChanged(object sender, System.EventArgs e)
+    {
+        if (gameController.gamePlayState == GameController.GamePlayState.Run)
+        {
+            Run();
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () 
@@ -48,17 +72,7 @@ public class Giraffe : MonoBehaviour
         HandleMouseInput();
         //HandleKeyboardInput();
 	}
-
-    private void OnClick()
-    {
-        print("Mouse clicked");
-    }
-
-    private void AdjustGiraffePositionBasedOnAspectRatio()
-    {
-        //Screen.c
-    }
-
+    
     private void HandleMouseInput()
     {
         bool isTouched = Input.GetMouseButton(0);
@@ -106,17 +120,25 @@ public class Giraffe : MonoBehaviour
         {
             case GiraffeHeight.High:
                 bodyRenderer.sprite = highGiraffe;
-                headCollider.center = new Vector2(headCollider.center.x, LowHeadColliderY + 2 * SpanBetweenHeadCollidersByY);
+                mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY + 2 * SpanBetweenHeadCollidersByY);
+                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY + 2 * SpanBetweenHeadCollidersByY);
+                var highMouthY = HighMouthY;
+                mouth.localPosition = new Vector3(mouth.localPosition.x, highMouthY, mouth.localPosition.z);
                 break;
 
             case GiraffeHeight.Middle:
                 bodyRenderer.sprite = middleGiraffe;
-                headCollider.center = new Vector2(headCollider.center.x, LowHeadColliderY + SpanBetweenHeadCollidersByY);
+                mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY + SpanBetweenHeadCollidersByY);
+                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY + SpanBetweenHeadCollidersByY);
+                var middleMouthY = MiddleMouthY;
+                mouth.localPosition = new Vector3(mouth.localPosition.x, middleMouthY, mouth.localPosition.z);
                 break;
 
             case GiraffeHeight.Low:
                 bodyRenderer.sprite = lowGiraffe;
-                headCollider.center = new Vector2(headCollider.center.x, LowHeadColliderY);
+                mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY);
+                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY);
+                mouth.localPosition = new Vector3(mouth.localPosition.x, LowMouthY, mouth.localPosition.z);
                 break;
         }
 
@@ -139,19 +161,38 @@ public class Giraffe : MonoBehaviour
     {
         ScoreBar.AddScore(1);
         Destroy(apple);
+        //PlayEatAnimation();
+        
     }
 
     private void OnBombCollected(GameObject bomb)
     {
         Destroy(bomb);
         ExplodeGiraffe();
+        //PlayEatAnimation();
+    }
+
+    private void Run()
+    {
+        // Play run animation
+        animator.SetBool("Running", true);
+        var dust = transform.FindChild("Dust");
+        dust.gameObject.SetActive(true);
+    }
+
+    private void PlayEatAnimation()
+    {
+        animator.SetTrigger("Eat");
     }
 
     private void ExplodeGiraffe()
     {
         // we can't use Destroy because coroutine will not fired after object is destroyed
         bodyRenderer.enabled = false;
-        headCollider.enabled = false;
+        mouthCollider.enabled = false;
+        mouth.gameObject.SetActive(false);
+        var dust = transform.FindChild("Dust");//
+        dust.gameObject.SetActive(false);
 
         // Run explode giraffe animation
 

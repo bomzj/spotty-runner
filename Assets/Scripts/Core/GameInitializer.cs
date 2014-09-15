@@ -48,12 +48,17 @@ namespace Assets.Scripts.Classes
 
         private void InitializeGameSettings()
         {
+            // Mock Social Platform
+            Social.Active = new FakeSocialPlatform();
+
              // For Debug : Make local user authenticated to show leaderboards 
             Social.localUser.Authenticate(result => { });
             // Reset score
-            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerScore, 0);
+            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
             
             //PlayerPrefs.SetInt(GameConsts.Settings.FirstTimePlay, 0);
+
+           
         }
     }
 }

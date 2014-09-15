@@ -12,7 +12,8 @@ namespace Assets.Scripts.Consts
 
         public class Settings
         {
-            public const string BestPlayerScore = "BestPlayerScore";
+            public const string BestPlayerLocalScore = "BestPlayerLocalScore";
+            public const string BestPlayerGlobalScore = "BestPlayerGlobalScore";
             public const string FirstTimePlay = "FirstTimePlay";
         }
     }

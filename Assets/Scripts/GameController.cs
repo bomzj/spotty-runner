@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
-using SuslikGames.SpottyRunner;
 using System.Linq;
 using Assets.Scripts.Classes.Models;
 using Assets.Scripts.Classes.Core;
 using System;
 using Assets.Scripts.Classes.Utils;
-using Assets.Scripts.Score;
-using Assets.Scripts.Panels;
 using Assets.Scripts.Ads;
-using UnityEngine.SocialPlatforms;
 using Assets.Scripts.Consts;
 
 /// <summary>
@@ -23,8 +19,6 @@ public class GameController : MonoBehaviour
 
     // Message bus
     public MessageBus MessageBus { get; private set; }
-
-    private bool isGameOver;
 
     private Pause pauseScript;
         
@@ -58,9 +52,9 @@ public class GameController : MonoBehaviour
         GameOver
     }
 
-    private GamePlayState gamePlayState;
+    public GamePlayState gamePlayState {get; private set;}
 
-    public event EventHandler Changed;
+    public event EventHandler GamePlayStateChanged;
 
 	// Use this for initialization
 	void Start () 
@@ -238,7 +232,16 @@ public class GameController : MonoBehaviour
         }
 
         this.gamePlayState = state;
+        OnGamePlayStateChanged();
         print("New game play state is " + state.ToString());
+    }
+
+    private void OnGamePlayStateChanged()
+    {
+        if (GamePlayStateChanged != null)
+        {
+            GamePlayStateChanged(this, EventArgs.Empty);
+        }
     }
 
     private void HandleHelpState()
@@ -283,7 +286,7 @@ public class GameController : MonoBehaviour
 
     private void HandleCountdownState()
     {
-        var keepPaused = new string[] {"Collectibles", "Background", "Foreground"};
+        var keepPaused = new string[] {"Collectibles", "Background", "Foreground", "Ground"};
         
         Pause[] pausableObjects = GameObject.FindObjectsOfType<Pause>();
         foreach (var item in pausableObjects)
@@ -298,6 +301,10 @@ public class GameController : MonoBehaviour
                 item.Resume();
             }
         }
+
+        // Hide pause button 
+        var pauseButton = GameObjectFinder.Find<UIButton>("Pause Button", true);
+        pauseButton.SetActive(false);
 
         // Fade scene to clear
         var fadeScene = GetComponent<FadeScene>();
@@ -330,7 +337,7 @@ public class GameController : MonoBehaviour
         var pauseButton = GameObjectFinder.Find<UIButton>("Pause Button", true);
         pauseButton.SetActive(true);
 
-        // Spaw collectibles
+        // Spawn collectibles
     }
 
     private void HandlePauseState()
@@ -357,6 +364,10 @@ public class GameController : MonoBehaviour
 
     private void HandleGameOverState()
     {
+        // Hide pause button 
+        var pauseButton = GameObjectFinder.Find<UIButton>("Pause Button", true);
+        pauseButton.SetActive(false);
+
         StartCoroutine(StartGameOverState());
     }
 
@@ -375,17 +386,18 @@ public class GameController : MonoBehaviour
         ScoreBar scoreBar = scoreBarObject.GetComponent<ScoreBar>();
         var currentPlayerScore = scoreBar.CurrentScore;
 
-        int bestPlayerScore = PlayerPrefs.GetInt(GameConsts.Settings.BestPlayerScore, 0);
+        int bestPlayerScore = PlayerPrefs.GetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
 
         if (currentPlayerScore > bestPlayerScore)
         {
-            // Save score to settings
-            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerScore, currentPlayerScore);
-                
-            // Show leaderboard if player authenticated (plays with leaderboards)
+            // Save global score and show leaderboard
             if (Social.localUser.authenticated)
             {
                 Social.ReportScore(currentPlayerScore, GameConsts.GeneralLeaderboardID, PlayerScoreReportedHandler);
+            }
+            else // Save local score
+            {
+                PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, currentPlayerScore);
             }
         }
         // Show ads
@@ -400,12 +412,35 @@ public class GameController : MonoBehaviour
         if (result)
         {
             print("Score reported");
-            // Show panel
-            ShowLeaderboardPanel();
+            var scoreBar = GameObject.Find("Score Bar").GetComponent<ScoreBar>();
+            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerGlobalScore, scoreBar.CurrentScore);
+            
+            // Get local user score in leaderboard
+            var leaderboard = Social.CreateLeaderboard();
+            leaderboard.id = GameConsts.GeneralLeaderboardID;
+            leaderboard.SetUserFilter(new[] { Social.localUser.id });
+            leaderboard.LoadScores(r => 
+            {
+                // Show panel if user exists in leaderboard
+                if (r)
+                {
+                    if (leaderboard.scores != null && leaderboard.scores.Count() > 0)
+                    {
+                        ShowLeaderboardPanel();
+                    }
+                }
+                else
+                {
+                    print("Failed to load local user score");
+                    // Just Restart Game in case of error
+                    ShowAdOrRestartGame();
+                }
+            });
         }
         else
         {
             print("Failed to report score");
+            ShowAdOrRestartGame();
         }
     }
 

@@ -57,6 +57,19 @@ public class Pause : MonoBehaviour {
         }
 
         // Pause all animations for this game object
+        var animators = this.gameObject.GetComponents<Animator>();
+        foreach (var item in animators)
+        {
+            item.enabled = !pause; 
+        }
+
+        // Pause particle systems
+        var particles = this.gameObject.GetComponents<ParticleSystem>();
+        foreach (var item in particles)
+        {
+            if (pause) item.Pause();
+            else item.Play();
+        }
 
         // Set pause flag
         isPaused = pause;

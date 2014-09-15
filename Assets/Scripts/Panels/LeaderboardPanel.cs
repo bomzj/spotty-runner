@@ -20,6 +20,8 @@ namespace Assets.Scripts.Panels
         private IEnumerable<IScore> loadedScores;
         private IEnumerable<IUserProfile> loadedUsers;
 
+        private const int MaxRowsCountToDisplay = 5;
+
         void Start()
         {
             // Get first row already existed as template
@@ -117,18 +119,55 @@ namespace Assets.Scripts.Panels
                 s => s.userID, 
                 u => u.id, 
                 (s, u) => new { Score = s, User = u});
+            
+            var scores = combinedScores.Take(5).ToList();
+            
+            // Find player in the leaderboard
+            var previousRank = 0;
+            var currentUserScore = combinedScores.FirstOrDefault(s => s.User.id == Social.localUser.id);
+            if (currentUserScore != null)
+            {
+                if (currentUserScore.Score.rank > MaxRowsCountToDisplay)
+                {
+                    // previous score to player
+                    previousRank = currentUserScore.Score.rank - 1;
+                    scores[MaxRowsCountToDisplay - 2] = combinedScores.FirstOrDefault(s => s.Score.rank == previousRank);
+                    // player score
+                    scores[MaxRowsCountToDisplay - 1] = currentUserScore;
+                }
+            }
 
-            foreach (var item in combinedScores)
+            foreach (var item in scores)
             {
                 AddScoreRow(item.Score, item.User);
+            }
+            
+            // Highlight current user row
+            if (currentUserScore != null)
+            {
+                if (currentUserScore.Score.rank > MaxRowsCountToDisplay)
+                {
+                    // it is last row
+                    HighlightRow(MaxRowsCountToDisplay - 1);
+                }
+                else
+                {
+                    // it is within top scores
+                    HighlightRow(currentUserScore.Score.rank - 1);
+                }
+            }
+
+            // Add seprator between top scores and scores adjacent to player
+            if (previousRank > MaxRowsCountToDisplay)
+            {
+                InsertSeparatorRow(MaxRowsCountToDisplay - 2);
             }
 
             ArrangeRowPositions();
         }
 
-        private void AddScoreRow(IScore score, IUserProfile user)
+        private GameObject CloneRowFromTemplate()
         {
-            // Clone row from template
             var row = Instantiate(scoreRowTemplate) as GameObject;
             row.transform.parent = transform.Find("Scores");
             var position = scoreRowTemplate.transform.localPosition;
@@ -136,27 +175,35 @@ namespace Assets.Scripts.Panels
             row.transform.localPosition = position;
             row.transform.localScale = scale;
             row.SetActive(true);
+            return row;
+        }
+
+        private GameObject CreateRow(string rankAndUser, string score)
+        {
+            // Clone row from template
+            var row = CloneRowFromTemplate();
 
             var rankAndUserNameLabel = row.transform.Find("1 - Rank and UserName").GetComponent<UILabel>();
-            rankAndUserNameLabel.text = string.Format("{0}. {1}", score.rank, user.userName);
-            
-            var scoreLabel = row.transform.Find("2 - Score").GetComponent<UILabel>();
-            scoreLabel.text = score.value.ToString();
+            rankAndUserNameLabel.text = rankAndUser;
 
+            var scoreLabel = row.transform.Find("2 - Score").GetComponent<UILabel>();
+            scoreLabel.text = score;
+
+            return row;
+        }
+        
+
+        private void AddScoreRow(IScore score, IUserProfile user)
+        {
+            var rankAndUser = string.Format("{0}. {1}", score.rank, user.userName);
+            var row = CreateRow(rankAndUser, score.value.ToString());
             rows.Add(row);
         }
 
-        private void AddSeparatorRow()
+        private void InsertSeparatorRow(int index)
         {
-            // Clone row from template
-            var row = Instantiate(scoreRowTemplate) as GameObject;
-            row.transform.parent = transform.Find("Scores");
-            row.SetActive(true);
-
-            var rankAndUserNameLabel = row.transform.Find("1 - Rank and UserName").GetComponent<UILabel>();
-            rankAndUserNameLabel.text = string.Format("...");
-
-            rows.Add(row);
+            var row = CreateRow("...", "");
+            rows.Insert(index, row);
         }
 
         private void ArrangeRowPositions()
@@ -168,6 +215,19 @@ namespace Assets.Scripts.Panels
             }
         }
 
+        private void HighlightRow(int rowIndex)
+        {
+            var row = rows[rowIndex];
+
+            var rankAndUserNameLabel = row.transform.Find("1 - Rank and UserName").GetComponent<UILabel>();
+            rankAndUserNameLabel.gradientTop = Color.red;
+            rankAndUserNameLabel.gradientBottom = Color.red;
+
+            var scoreLabel = row.transform.Find("2 - Score").GetComponent<UILabel>();
+            scoreLabel.gradientTop = Color.red;
+            scoreLabel.gradientBottom = Color.red;
+        }
+
         private void ClearAllScoreRows()
         {
             foreach (var item in rows)
@@ -177,6 +237,8 @@ namespace Assets.Scripts.Panels
             rows.Clear();
         }
 
+
+        
         
     }
 }

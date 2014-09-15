@@ -21,7 +21,7 @@ public class ScoreBar : MonoBehaviour {
         var currentScore = transform.Find("Current Score");
         currentScoreLabel = currentScore.GetComponent<UILabel>();
 
-        var bestScore = PlayerPrefs.GetInt(GameConsts.Settings.BestPlayerScore, 0);
+        var bestScore = PlayerPrefs.GetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
         var bestScoreLabel = transform.Find("Best Score").GetComponent<UILabel>();
         bestScoreLabel.text = string.Format("Best: {0}", bestScore);
 
