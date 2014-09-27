@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using SuslikGames.SpottyRunner.Classes.Definitions;
+using System;
 
 /// <summary>
 /// Handle player input, managing Giraffe states
@@ -18,15 +19,14 @@ public class Giraffe : MonoBehaviour
     public Sprite middleGiraffe;
     public Sprite lowGiraffe;
     
-    public Sprite smileMouth;
-    public Sprite eatingMouth;
-
     private GiraffeHeight currentGiraffeHeight = GiraffeHeight.Low;
 
     private SpriteRenderer bodyRenderer;
     private BoxCollider2D mouthCollider;
-    private BoxCollider2D preMouthCollider;
     private Transform mouth;
+    private Transform appleParticlesTransform;
+    private ParticleSystem appleParticles;
+    private ParticleSystem spotParticles;
     private Animator animator;
 
     private GameController gameController;
@@ -49,9 +49,12 @@ public class Giraffe : MonoBehaviour
         mouth = body.Find("Mouth").transform;
         mouthCollider = GetComponent<BoxCollider2D>();
 
-        var preMouth = body.Find("PreMouth").transform;
-        preMouthCollider = preMouth.GetComponent<BoxCollider2D>();
- 
+        appleParticlesTransform = transform.Find("AppleParticles").transform;
+        appleParticles = appleParticlesTransform.GetComponent<ParticleSystem>();
+
+        var spotParticlesTransform = transform.Find("SpotParticles").transform;
+        spotParticles = spotParticlesTransform.GetComponent<ParticleSystem>();
+
         animator = GetComponent<Animator>();
 
         SetGiraffeHeight(currentGiraffeHeight);
@@ -61,7 +64,7 @@ public class Giraffe : MonoBehaviour
     {
         if (gameController.gamePlayState == GameController.GamePlayState.Run)
         {
-            Run();
+            PlayRunAnimation();
         }
     }
 	
@@ -121,7 +124,7 @@ public class Giraffe : MonoBehaviour
             case GiraffeHeight.High:
                 bodyRenderer.sprite = highGiraffe;
                 mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY + 2 * SpanBetweenHeadCollidersByY);
-                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY + 2 * SpanBetweenHeadCollidersByY);
+                appleParticlesTransform.position = mouthCollider.bounds.center;
                 var highMouthY = HighMouthY;
                 mouth.localPosition = new Vector3(mouth.localPosition.x, highMouthY, mouth.localPosition.z);
                 break;
@@ -129,7 +132,7 @@ public class Giraffe : MonoBehaviour
             case GiraffeHeight.Middle:
                 bodyRenderer.sprite = middleGiraffe;
                 mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY + SpanBetweenHeadCollidersByY);
-                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY + SpanBetweenHeadCollidersByY);
+                appleParticlesTransform.position = mouthCollider.bounds.center;
                 var middleMouthY = MiddleMouthY;
                 mouth.localPosition = new Vector3(mouth.localPosition.x, middleMouthY, mouth.localPosition.z);
                 break;
@@ -137,7 +140,7 @@ public class Giraffe : MonoBehaviour
             case GiraffeHeight.Low:
                 bodyRenderer.sprite = lowGiraffe;
                 mouthCollider.center = new Vector2(mouthCollider.center.x, LowHeadColliderY);
-                preMouthCollider.center = new Vector2(preMouthCollider.center.x, LowHeadColliderY);
+                appleParticlesTransform.position = mouthCollider.bounds.center;
                 mouth.localPosition = new Vector3(mouth.localPosition.x, LowMouthY, mouth.localPosition.z);
                 break;
         }
@@ -149,33 +152,33 @@ public class Giraffe : MonoBehaviour
     {
         if (other.gameObject.tag == "Apple")
         {
-            OnAppleCollected(other.gameObject);
+            CollectApple(other.gameObject);
         }
         else if (other.gameObject.tag == "Bomb")
         {
-            OnBombCollected(other.gameObject);
+            CollectBomb(other.gameObject);
         }
     }
 
-    private void OnAppleCollected(GameObject apple)
+    private void CollectApple(GameObject apple)
     {
         ScoreBar.AddScore(1);
         Destroy(apple);
-        //PlayEatAnimation();
-        
+        PlayEatAnimation();
     }
 
-    private void OnBombCollected(GameObject bomb)
+    private void CollectBomb(GameObject bomb)
     {
         Destroy(bomb);
-        ExplodeGiraffe();
-        //PlayEatAnimation();
+        HideGiraffe();
+        PlayExplodeAnimation();
+        gameController.GameOver();
     }
 
-    private void Run()
+    private void PlayRunAnimation()
     {
         // Play run animation
-        animator.SetBool("Running", true);
+        animator.SetBool("Run", true);
         var dust = transform.FindChild("Dust");
         dust.gameObject.SetActive(true);
     }
@@ -183,9 +186,16 @@ public class Giraffe : MonoBehaviour
     private void PlayEatAnimation()
     {
         animator.SetTrigger("Eat");
+        appleParticles.Play();
+        print("PlayEatAnimation");
     }
 
-    private void ExplodeGiraffe()
+    private void PlayExplodeAnimation()
+    {
+        spotParticles.Play();
+    }
+
+    private void HideGiraffe()
     {
         // we can't use Destroy because coroutine will not fired after object is destroyed
         bodyRenderer.enabled = false;
@@ -193,16 +203,6 @@ public class Giraffe : MonoBehaviour
         mouth.gameObject.SetActive(false);
         var dust = transform.FindChild("Dust");//
         dust.gameObject.SetActive(false);
-
-        // Run explode giraffe animation
-
-        // Send message that giraffe is dead (GameOver)
-        StartCoroutine(SendGameOverMessage());
     }
 
-    private IEnumerator SendGameOverMessage()
-    {
-        yield return new WaitForSeconds(2);
-        gameController.GameOver();
-    }
 }

@@ -27,11 +27,17 @@ namespace SuslikGames.SpottyRunner
         public Transform bombPrefab;
 
         private System.Random random = new System.Random(DateTime.Now.Millisecond);
-		private Transform[] lastCollectibles = new Transform[CollectibleRows];
+		private List<Transform[]> lastCollectibleWaves = new List<Transform[]>();
+        public int lastCollectibleWavesCount = 1;
 
         private TreeGenerator treeGenerator;
         private Transform[] lastTrees = new Transform[CollectibleRows];
         private GameObject foregroundTrees;
+
+        /// <summary>
+        /// Is used by collectibles generation 
+        /// </summary>
+        private float passedTime;
 
         #region Unity Callbacks
 
@@ -40,17 +46,25 @@ namespace SuslikGames.SpottyRunner
         {
             treeGenerator = GameObject.FindObjectOfType<TreeGenerator>();
             foregroundTrees = GameObject.Find("Trees/Foreground");
+
+            ObjectPool.CreatePool(applePrefab);
+            ObjectPool.CreatePool(bombPrefab);
+            ObjectPool.CreatePool(emptyPrefab);
+            
             InitializeLastCollectibles();
+
         }
 
         // Update is called once per frame
         void Update()
         {
+            passedTime += Time.deltaTime;
+
             // if last collectibles cross the start point then generate next ones
-            Transform lastCollectible = lastCollectibles[0];
+            Transform lastCollectible = lastCollectibleWaves.Last()[0];
             if (lastCollectible.position.x < CollectibleStartPosition.x)
             {
-                GenerateNextCollectibles();
+                GenerateNextCollectibles(passedTime);
                 GenerateTreesForNextCollectiblesIfNeeded();
             }
             
@@ -65,51 +79,118 @@ namespace SuslikGames.SpottyRunner
         /// </summary>
         private void InitializeLastCollectibles()
         {
-            Vector2 startPosition = CollectibleStartPosition;
-            
-            for (int i = 0; i < CollectibleRows; i++)
+            //Vector2 startPosition = CollectibleStartPosition;
+
+            for (int j = 0; j < lastCollectibleWavesCount; j++)
             {
-                lastCollectibles[i] = GenerateCollectible(CollectibleType.Empty, startPosition);
-                // move to next row
-                startPosition -= new Vector2(0, SpanBetweenCollectibleRows);
+                Vector2 startPosition = CollectibleStartPosition + new Vector3(j * CollectibleDesignSize.WidthInUnits, 0, 0);
+
+                var lastWave = new Transform[3];
+                lastCollectibleWaves.Add(lastWave);
+
+                for (int i = 0; i < CollectibleRows; i++)
+                {
+                    lastWave[i] = GenerateCollectible(CollectibleType.Empty, startPosition);
+                    // move to next row
+                    startPosition -= new Vector2(0, SpanBetweenCollectibleRows);
+                }
             }
         }
 
-        private CollectibleType GetNextCollectibleType(int collectedAppleCount)
+        private float GetAppleProbability(float time)
         {
-            CollectibleType nextCollectibleType = CollectibleType.Empty;
-
-            float appleProbability = collectedAppleCount < 20 ? 0.02f * collectedAppleCount : 0.2f;
-            float bombProbability = collectedAppleCount < 20 ? 0.01f * collectedAppleCount : 0.1f;
-            float appleOrBombProbability = appleProbability + bombProbability;
+            // 30% is max
+            float appleProbability = 0.3f;
             
-            var probability = random.Range(0, 1);
+            // 0 - 30% for 30 sec
+            if (passedTime < 30)
+            {
+                appleProbability = 0.01f * time;
+            }
+            else if (passedTime < 60) // 30% - 10% from 30 sec 
+            {
+                appleProbability = Mathf.Clamp(0.6f - 0.01f * time, 0.1f, 0.3f);
+            }
 
-            // Uses ranges to determine what collectible to choose
-            // apple from 0 to appleProbability, 
-            // bomb from appleProbabiltiy to (appleProbability+bombProbability)
-            // empty from (appleProbability+bombProbability) to 1
-            if (probability < appleProbability)
-            {
-                nextCollectibleType = CollectibleType.Apple;
-            }
-            else if (probability >= appleProbability && probability < appleOrBombProbability)
-            {
-                nextCollectibleType = CollectibleType.Bomb;
-            }
-            
-            return nextCollectibleType;
+            return appleProbability;
         }
 
-        private CollectibleType[] GenerateNextCollectibeTypes()
+        private float GetBombProbabilityForRow(List<CollectibleType[]> lastWaves, CollectibleType[] nextWave, int row, float time)
         {
-            //CollectibleType[] lastCollectibleTypes;
+            // Merge last rows with next for bomb line detection 
+            // if merged line is full filled up with bombs so there is no possibility to spawn one more
+            CollectibleType[] mergedWave = new CollectibleType[3];
+            for (int j = 0; j < lastCollectibleWavesCount; j++)
+            {
+                var lastWave = lastWaves[j];
+                for (int i = 0; i < 3; i++)
+                {
+                    if (lastWave[i] == CollectibleType.Bomb || nextWave[i] == CollectibleType.Bomb)
+                    {
+                        mergedWave[i] = CollectibleType.Bomb;
+                    }
+                }
+            }
+            // Make assumption for bomb possibility for current row
+            mergedWave[row] = CollectibleType.Bomb;
+
+            // Check that there is no non-passable bomb line
+            bool bombLine = mergedWave.All(i => i == CollectibleType.Bomb);
+
+            // if there is no bomb line then try to get bomb probability
+            float bombProbability = 0;
+            if (!bombLine)
+            {
+                bombProbability = Mathf.Clamp(0.01f * time, 0, 0.6f);
+            }
+          
+            return bombProbability;
+        }
+
+        private CollectibleType[] GenerateNextCollectibeTypes(float passedTime)
+        {
+            // Get last collectibles
+            List<CollectibleType[]> lastWaveTypes = new List<CollectibleType[]>();
+            for (int j = 0; j < lastCollectibleWavesCount; j++)
+            {
+                var currentLastWave = lastCollectibleWaves[j];
+                var currentLastWaveTypes = new CollectibleType[3];
+                lastWaveTypes.Add(currentLastWaveTypes);
+                
+                for (int i = 0; i < 3; i++)
+                {
+                    var collectibleTag = currentLastWave[i].tag;
+                    currentLastWaveTypes[i] = CollectibleType.Empty;
+                    if (collectibleTag == "Apple") currentLastWaveTypes[i] = CollectibleType.Apple;
+                    else if (collectibleTag == "Bomb") currentLastWaveTypes[i] = CollectibleType.Bomb;
+                }
+            }
+
             var nextCollectibleTypes = new CollectibleType[CollectibleRows];
 
             for (int i = 0; i < CollectibleRows; i++)
 	        {
-                int collectedAppleCount = 5;
-                nextCollectibleTypes[i] = GetNextCollectibleType(collectedAppleCount);
+                float appleChance = GetAppleProbability(passedTime);
+                float bombChance = GetBombProbabilityForRow(lastWaveTypes, nextCollectibleTypes, i, passedTime);
+                float appleOrBombProbability = appleChance + bombChance;
+                
+                var probability = random.Range(0, 1);
+                var nextCollectibleType = CollectibleType.Empty;
+
+                // Uses ranges to determine what collectible to choose
+                // apple from 0 to appleProbability, 
+                // bomb from appleProbabiltiy to (appleProbability+bombProbability)
+                // empty from (appleProbability+bombProbability) to 1
+                if (probability < appleChance)
+                {
+                    nextCollectibleType = CollectibleType.Apple;
+                }
+                else if (probability >= appleChance && probability < appleOrBombProbability)
+                {
+                    nextCollectibleType = CollectibleType.Bomb;
+                }
+
+                nextCollectibleTypes[i] = nextCollectibleType;
 	        }
             
             return nextCollectibleTypes;
@@ -118,18 +199,21 @@ namespace SuslikGames.SpottyRunner
         /// <summary>
         /// Generates next collectibles and place them in the level at the right outside the screen
         /// </summary>
-        private void GenerateNextCollectibles()
+        private void GenerateNextCollectibles(float passedTime)
         {
-            var nextCollectibleTypes = GenerateNextCollectibeTypes();
-                        
+            var nextCollectibleTypes = GenerateNextCollectibeTypes(passedTime);
+            var lastWave = lastCollectibleWaves.Last();
+            var nextWave = new Transform[3];
+
             for (int i = 0; i < CollectibleRows; i++)
             {
                 CollectibleType type = nextCollectibleTypes[i];
-                var startPosition = GetStartPositionForNextCollectible(lastCollectibles[i]);
+                var startPosition = GetStartPositionForNextCollectible(lastWave[i]);
                 var nextCollectible = GenerateCollectible(type, startPosition);
-                lastCollectibles[i] = nextCollectible;
+                nextWave[i] = nextCollectible;
             }
-
+            lastCollectibleWaves.Add(nextWave);
+            lastCollectibleWaves.RemoveAt(0);
         }
 
         private Transform GenerateCollectible(CollectibleType collectibleType, Vector2 position)
@@ -152,7 +236,8 @@ namespace SuslikGames.SpottyRunner
             }
 
             // TODO: it is good idea to recycle dead objects and put them in pool cache instead of instatiation always 
-            var nextCollectible = Instantiate(prefab) as Transform;
+            //var nextCollectible = Instantiate(prefab) as Transform;
+            var nextCollectible = ObjectPool.Spawn(prefab);
             nextCollectible.parent = this.transform;
             nextCollectible.position = (Vector3)position + new Vector3(0, 0, this.transform.position.z);
 
@@ -170,9 +255,10 @@ namespace SuslikGames.SpottyRunner
         /// </summary>
         private void GenerateTreesForNextCollectiblesIfNeeded()
         {
+            var lastWave = lastCollectibleWaves.Last();
             for (int i = 0; i < CollectibleRows; i++)
             {
-                Transform collectible = lastCollectibles[i];
+                Transform collectible = lastWave[i];
                 // or use GetComponents<BoxCollider2D> if a few colliders attached to object
                 BoxCollider2D collectibleCollider = collectible.collider2D as BoxCollider2D;
                 // skip empty collectibles

@@ -1,56 +1,118 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Assets.Scripts.Classes.Utils;
+using Assets.Scripts.Score.Facebook;
+using Assets.Scripts.Score;
 
-public class MainMenuController : MonoBehaviour {
+public class MainMenuController : MonoBehaviour 
+{
+    private UIButton leaderboardButton;
+    private UIToggle toggleSoundButton;
+    private UI2DSprite loginButtonUI2DSprite;
+    private UILabel loginLabel;
+    private UILabel welcomeLabel;
 
-    public Sprite playButtonSprite;
+    private bool logging;
 
-    private GUIStyle buttonGUIStyle;
-    private Color highlightColor = new Color(0.85f,0.85f,0.85f);
-    private bool isClicked;
-
-    //public event Action action;
+    public Sprite loginButtonSprite;
+    public Sprite logoutButtonSprite;
+    public Transform leaderboardPanelPrefab;
 
 	// Use this for initialization
 	void Start () {
-        //buttonGUIStyle = new GUIStyle();
-        //buttonGUIStyle.normal.background = playButtonSprite.texture;
-        //buttonGUIStyle.active.background = playButtonSprite.texture;
-        //buttonGUIStyle.hover.background = playButtonSprite.texture;
+        leaderboardButton = GameObject.Find("Leaderboard Button").GetComponent<UIButton>();
+        toggleSoundButton = GameObject.Find("Toggle Sound Button").GetComponent<UIToggle>();
+        toggleSoundButton.value = AudioListener.volume > 0;
+        loginButtonUI2DSprite = GameObject.Find("Facebook Login Button").GetComponent<UI2DSprite>();
+        loginLabel = GameObject.Find("Facebook Login Title").GetComponent<UILabel>();
+        welcomeLabel = GameObject.Find("Welcome Title").GetComponent<UILabel>();
+        UpdateUI();
 	}
 	
 	// Update is called once per frame
 	void Update () {
            
 	}
-     
 
-    public void OnPlayClicked()
+    void UpdateUI()
+    {
+        leaderboardButton.isEnabled = Social.localUser.authenticated;
+        loginButtonUI2DSprite.sprite2D = !Social.localUser.authenticated ? loginButtonSprite : logoutButtonSprite;
+        loginLabel.text = !Social.localUser.authenticated ? "Login" : "Logout";
+        welcomeLabel.enabled = Social.localUser.authenticated;
+        welcomeLabel.text = string.Format("Welcome, {0}!", Social.localUser.userName);
+    }
+
+    #region Callbacks
+
+    public void AuthenticationResultCallback(bool authenticated)
+    {
+        UpdateUI();
+        logging = false;
+    }
+
+    #endregion
+
+
+    #region Button Handlers
+
+    public void PlayGame()
     {
         Application.LoadLevel("GamePlay");
     }
 
-    //void OnGUI()
-    //{
-    //    // Make a background box
-    //    //GUI.Box(new Rect(10, 10, 100, 90), "Loader Menu");
+    public void ShowLeaderboard()
+    {
         
-    //    if (isClicked)
-    //    {
-    //        // For highlight the button , should be called before gui.button call
-    //        GUI.color = highlightColor;
-    //    }
-    //    else
-    //    {
-    //        //GUI.color = Color.white;
-    //    }
+        var leaderboardPanel = GameObjectFinder.Find("Leaderboard Panel", true);
+        NGUITools.SetActive(leaderboardPanel, true);
+        //if (leaderboardPanel != null && !leaderboardPanel.activeSelf)
+        //{
+        //    //var newPanel = Instantiate(leaderboardPanelPrefab) as GameObject;
+        //    //newPanel.transform.parent = GameObject.Find("UI Root").transform;
+        //    NGUITools.SetActive(leaderboardPanel, true);
+        //}
+    }
 
-    //    // Play button
-    //    if (GUI.Button(new Rect(20, 40, 80, 20), "", buttonGUIStyle))
-    //    {
-    //        isClicked = true;
-    //        Application.LoadLevel("GamePlay");
-    //    }
-    //}
+    public void DisposeLeaderboard()
+    {
+         var leaderboardPanel = GameObjectFinder.Find("Leaderboard Panel", true);
+         Destroy(leaderboardPanel);
+    }
+
+    public void ToggleLogin()
+    {
+        if (!Social.localUser.authenticated)
+        {
+            Login();
+        }
+        else
+        {
+            Logout();
+        }
+    }
+
+    public void Login()
+    {
+        if (!logging)
+        {
+            Social.localUser.Authenticate(AuthenticationResultCallback);
+        }
+    }
+
+    public void Logout()
+    {
+        (Social.Active as IAuthenticationProvider).Logout();
+        UpdateUI();
+    }
+
+    public void ToggleSound()
+    {
+        AudioListener.volume = toggleSoundButton.value ? 1 : 0;
+        print("toggle sound " + toggleSoundButton.value.ToString());
+    }
+
+    #endregion
+
 }

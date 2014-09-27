@@ -35,6 +35,13 @@ namespace SuslikGames.SpottyRunner
         // Use this for initialization
         void Start()
         {
+            foreach (var treeCollection in treeCollections)
+            {
+                foreach (var prefab in treeCollection.treePrefabs)
+                {
+                    ObjectPool.CreatePool(prefab);
+                }
+            }
             FillScreenWithTrees();
         }
                 
@@ -69,7 +76,8 @@ namespace SuslikGames.SpottyRunner
             int selectedTreePefabIndex = random.Next(treeCollection.treePrefabs.Length);
             Transform selectedTreePrefab = treeCollection.treePrefabs[selectedTreePefabIndex];
 
-            var tree = Instantiate(selectedTreePrefab) as Transform;
+            //var tree = Instantiate(selectedTreePrefab) as Transform;
+            var tree = ObjectPool.Spawn(selectedTreePrefab);
             tree.parent = parent;
             Vector3 position = new Vector3(
                 positionX, 

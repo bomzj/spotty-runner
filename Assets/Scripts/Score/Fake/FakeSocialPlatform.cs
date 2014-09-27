@@ -7,7 +7,7 @@ using UnityEngine.SocialPlatforms;
 
 namespace Assets.Scripts.Score
 {
-    class FakeSocialPlatform : ISocialPlatform
+    class FakeSocialPlatform : ISocialPlatform, IAuthenticationProvider
     {
         FakeLeaderboard leaderboard;
         IEnumerable<FakeUserProfile> users;
@@ -16,6 +16,7 @@ namespace Assets.Scripts.Score
         {
             leaderboard = GenerateFakeLeaderboard();
             users = GenerateFakeUsers();
+            localUser = new FakeLocalUser();
         }
 
         public void Authenticate(ILocalUser user, Action<bool> callback)
@@ -101,7 +102,8 @@ namespace Assets.Scripts.Score
 
         public ILocalUser localUser
         {
-            get { return new FakeLocalUser(); }
+            get;
+            private set;
         }
 
         private IEnumerable<FakeUserProfile> GenerateFakeUsers()
@@ -128,6 +130,11 @@ namespace Assets.Scripts.Score
             FakeLeaderboard leaderboard = new FakeLeaderboard();
             leaderboard.CalculateRankAndOrder(leaderboard.scores);
             return leaderboard;
+        }
+
+        public void Logout()
+        {
+            localUser = new FakeLocalUser();
         }
     }
 }

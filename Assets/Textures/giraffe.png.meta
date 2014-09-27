@@ -1,6 +1,13 @@
 fileFormatVersion: 2
 guid: 27d3323087b2c574d94db96e33a5e3ff
 TextureImporter:
+  fileIDToRecycleName:
+    21300000: giraffe_0
+    21300002: giraffe_1
+    21300004: giraffe_2
+    21300006: giraffe_3
+    21300008: giraffe_4
+    21300010: giraffe_5
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -35,6 +42,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 1
   textureType: 8
@@ -54,6 +62,7 @@ TextureImporter:
         height: 79
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: giraffe_1
       rect:
         serializedVersion: 2
@@ -63,6 +72,7 @@ TextureImporter:
         height: 79
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: giraffe_2
       rect:
         serializedVersion: 2
@@ -72,6 +82,7 @@ TextureImporter:
         height: 79
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: giraffe_3
       rect:
         serializedVersion: 2
@@ -81,6 +92,7 @@ TextureImporter:
         height: 447
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: giraffe_4
       rect:
         serializedVersion: 2
@@ -90,6 +102,7 @@ TextureImporter:
         height: 207
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: giraffe_5
       rect:
         serializedVersion: 2
@@ -99,5 +112,6 @@ TextureImporter:
         height: 328
       alignment: 6
       pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 

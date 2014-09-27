@@ -24,6 +24,8 @@ namespace Assets.Scripts.Panels
 
         void Start()
         {
+            print("leaderboard enabled");
+
             // Get first row already existed as template
             scoreRowTemplate = transform.Find("Scores/Score Row Template").gameObject;
             scoreRowTemplate.SetActive(false);
@@ -44,12 +46,23 @@ namespace Assets.Scripts.Panels
 
         void OnEnable()
         {
-            print("leaderboard enabled");
+            
         }
 
         void OnDisable()
         {
             print("leaderboard disabled");
+            //var tweenPosition = GetComponent<TweenAlpha>();
+            //tweenPosition.ResetToBeginning();
+            //var tweenAlpha = GetComponent<TweenPosition>();
+            //tweenAlpha.ResetToBeginning();
+            //var tweens = GetComponents<UITweener>();
+            //// Play tweens (alpha and position)
+            //foreach (var item in tweens)
+            //{
+            //    item.ResetToBeginning();
+            //    item.PlayForward();
+            //}
         }
 
         void UpdateLoadingMessage(string message)

@@ -19,7 +19,7 @@ namespace Assets.Scripts.Classes
     {
         private static bool isInitialized;
 
-        void Start()
+        void Awake()
         {
             if (!isInitialized)
             {
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Classes
             PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
             
             //PlayerPrefs.SetInt(GameConsts.Settings.FirstTimePlay, 0);
-
+            AudioListener.volume = 1;
            
         }
     }

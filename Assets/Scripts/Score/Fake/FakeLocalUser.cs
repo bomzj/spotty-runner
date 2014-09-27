@@ -13,7 +13,8 @@ namespace Assets.Scripts.Score.Fake
         
         public void Authenticate(Action<bool> callback)
         {
-            callback(true);
+            authenticated = true;
+            callback(authenticated);
         }
 
         public void LoadFriends(Action<bool> callback)
@@ -23,7 +24,8 @@ namespace Assets.Scripts.Score.Fake
 
         public bool authenticated
         {
-            get { return true; }
+            get;
+            private set;
         }
 
         public IUserProfile[] friends

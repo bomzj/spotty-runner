@@ -373,13 +373,28 @@ public class GameController : MonoBehaviour
 
     IEnumerator StartGameOverState()
     {
-        HandlePauseState();
+        // Hide collectibles 
+        GameObject.Find("Collectibles").SetActive(false);
+        
+        // Find pausable objects and pause them all
+        Pause[] pausableObjects = GameObject.FindObjectsOfType<Pause>();
+        foreach (var item in pausableObjects)
+        {
+            item.SetPause();
+        }
+
+        yield return new WaitForSeconds(1);
 
         // show Game Over message
         var gameOverLabelObject = GameObjectFinder.Find("Game Over Label", true);
         gameOverLabelObject.SetActive(true);
         yield return new WaitForSeconds(3);
         gameOverLabelObject.SetActive(false);
+
+        yield return new WaitForSeconds(1);
+
+        // Pause movement objects such as trees
+        HandlePauseState();
 
         // Compare current score result with saved
         var scoreBarObject = GameObject.Find("Score Bar");

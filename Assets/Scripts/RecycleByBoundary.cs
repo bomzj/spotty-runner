@@ -12,6 +12,7 @@ public class RecycleByBoundary : MonoBehaviour
     
     void OnTriggerEnter2D(Collider2D collider)
     {
+        ObjectPool.Recycle(collider.transform);
         //gameplayScreen.RecycleGameObject(collider.gameObject);
     }
 }
