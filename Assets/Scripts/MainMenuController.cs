@@ -62,17 +62,16 @@ public class MainMenuController : MonoBehaviour
         Application.LoadLevel("GamePlay");
     }
 
-    public void ShowLeaderboard()
+    public void DisablePlayButton()
     {
-        
-        var leaderboardPanel = GameObjectFinder.Find("Leaderboard Panel", true);
-        NGUITools.SetActive(leaderboardPanel, true);
-        //if (leaderboardPanel != null && !leaderboardPanel.activeSelf)
-        //{
-        //    //var newPanel = Instantiate(leaderboardPanelPrefab) as GameObject;
-        //    //newPanel.transform.parent = GameObject.Find("UI Root").transform;
-        //    NGUITools.SetActive(leaderboardPanel, true);
-        //}
+        var playButton = GameObject.Find("Play Button");
+        playButton.SetActive(false);
+    }
+
+    public void EnablePlayButton()
+    {
+        var playButton = GameObjectFinder.Find("Play Button", true);
+        playButton.SetActive(true);
     }
 
     public void DisposeLeaderboard()

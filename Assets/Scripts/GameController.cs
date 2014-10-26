@@ -394,7 +394,7 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(1);
 
         // Pause movement objects such as trees
-        HandlePauseState();
+        //HandlePauseState();
 
         // Compare current score result with saved
         var scoreBarObject = GameObject.Find("Score Bar");

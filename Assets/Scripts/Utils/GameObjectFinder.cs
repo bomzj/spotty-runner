@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Scripts.Classes.Utils
@@ -45,16 +46,30 @@ namespace Assets.Scripts.Classes.Utils
         {
             if (alsoSearchDisabled)
             {
-                return Resources.FindObjectsOfTypeAll<GameObject>()
-                    .Where(item => item.name == name)
-                    .FirstOrDefault();
+                var objs = Resources.FindObjectsOfTypeAll<GameObject>()
+                    .Where(item => item.name == name);
+                // Exclude prefabs
+                foreach (var obj in objs)
+                {
+                    if (obj.hideFlags == HideFlags.NotEditable || obj.hideFlags == HideFlags.HideAndDontSave)
+                        continue;
+        
+                    var assetPath = AssetDatabase.GetAssetPath(obj.transform.root.gameObject);
+                    if (!String.IsNullOrEmpty(assetPath))
+                        continue;
+
+                    return obj;
+                }
             }
             else
             {
                 return GameObject.Find(name);
             }
+
+            return null;
         }
 
+        
         
     }
 }
