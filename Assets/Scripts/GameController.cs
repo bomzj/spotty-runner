@@ -56,6 +56,8 @@ public class GameController : MonoBehaviour
 
     public event EventHandler GamePlayStateChanged;
 
+    public GameObject leaderboardPanel;
+
 	// Use this for initialization
 	void Start () 
     {
@@ -165,13 +167,13 @@ public class GameController : MonoBehaviour
 
     private void ShowLeaderboardPanel()
     {
-        var leaderboardPanelObject = GameObjectFinder.Find("Leaderboard Panel", true);
-        leaderboardPanelObject.SetActive(true);
+        //var leaderboardPanelObject = GameObjectFinder.Find("Leaderboard Panel", true);
+        leaderboardPanel.SetActive(true);
     }
 
     private void ShowPanel()
     {
-
+        
     }
 
     private void HidePanel()

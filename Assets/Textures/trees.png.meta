@@ -11,6 +11,7 @@ TextureImporter:
     21300012: trees_6
     21300014: trees_7
     21300016: trees_8
+    21300018: trees_9
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -59,29 +60,29 @@ TextureImporter:
     - name: trees_0
       rect:
         serializedVersion: 2
-        x: 10
+        x: 3
         y: 668
-        width: 286
-        height: 426
+        width: 284
+        height: 425
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: trees_1
       rect:
         serializedVersion: 2
-        x: 324
+        x: 316
         y: 680
         width: 272
-        height: 412
+        height: 411
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: trees_2
       rect:
         serializedVersion: 2
-        x: 640
-        y: 661
-        width: 254
+        x: 633
+        y: 660
+        width: 253
         height: 431
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -89,19 +90,19 @@ TextureImporter:
     - name: trees_3
       rect:
         serializedVersion: 2
-        x: 36
-        y: 392
-        width: 159
-        height: 252
+        x: 28
+        y: 391
+        width: 160
+        height: 251
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: trees_4
       rect:
         serializedVersion: 2
-        x: 244
-        y: 411
-        width: 135
+        x: 238
+        y: 410
+        width: 133
         height: 201
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -109,8 +110,8 @@ TextureImporter:
     - name: trees_5
       rect:
         serializedVersion: 2
-        x: 415
-        y: 404
+        x: 407
+        y: 403
         width: 142
         height: 212
       alignment: 0
@@ -119,28 +120,28 @@ TextureImporter:
     - name: trees_6
       rect:
         serializedVersion: 2
-        x: 7
+        x: 0
         y: 0
         width: 240
-        height: 372
+        height: 371
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: trees_7
       rect:
         serializedVersion: 2
-        x: 275
+        x: 268
         y: 12
-        width: 213
-        height: 352
+        width: 212
+        height: 351
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: trees_8
       rect:
         serializedVersion: 2
-        x: 522
-        y: 26
+        x: 514
+        y: 25
         width: 223
         height: 331
       alignment: 0
@@ -149,9 +150,9 @@ TextureImporter:
     - name: trees_9
       rect:
         serializedVersion: 2
-        x: 759
-        y: 18
-        width: 209
+        x: 752
+        y: 17
+        width: 206
         height: 331
       alignment: 0
       pivot: {x: 0, y: 0}

@@ -16,7 +16,6 @@ public class PauseMenuPanelController : MonoBehaviour {
 
     public void NavigateToMainMenu()
     {
-        //Application.LoadLevel("MainMenu");
-        Application.LoadLevel("GamePlay");
+        Application.LoadLevel("MainMenu");
     }
 }
