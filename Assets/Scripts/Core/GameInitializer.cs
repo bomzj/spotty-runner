@@ -4,6 +4,7 @@ using Assets.Scripts.Classes.Core;
 using Assets.Scripts.Classes.Models;
 using Assets.Scripts.Consts;
 using Assets.Scripts.Score;
+using GooglePlayGames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,15 +49,18 @@ namespace Assets.Scripts.Classes
 
         private void InitializeGameSettings()
         {
-            // Mock Social Platform
-            Social.Active = new FakeSocialPlatform();
+            // recommended for debugging:
+            PlayGamesPlatform.DebugLogEnabled = true;
 
-             // For Debug : Make local user authenticated to show leaderboards 
-            Social.localUser.Authenticate(result => { });
+            // Activate the Google Play Games platform
+            PlayGamesPlatform.Activate();
+
             // Reset score
             PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
             
-            //PlayerPrefs.SetInt(GameConsts.Settings.FirstTimePlay, 0);
+            // Reset games count played
+            //PlayerPrefs.SetInt(GameConsts.Settings.GamesCountPlayed, 0);
+            
             AudioListener.volume = 1;
            
         }

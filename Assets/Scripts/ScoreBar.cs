@@ -4,6 +4,7 @@ using Assets.Scripts.Consts;
 
 public class ScoreBar : MonoBehaviour {
 
+    // TODO: Make as separate Score class
     public int CurrentScore { get; private set; }
     
     private UILabel currentScoreLabel;

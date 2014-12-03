@@ -7,20 +7,17 @@ using System;
 using Assets.Scripts.Classes.Utils;
 using Assets.Scripts.Ads;
 using Assets.Scripts.Consts;
+using GooglePlayGames;
 
 /// <summary>
 /// Gameplay state/controller/screen
 /// </summary>
 public class GameController : MonoBehaviour 
 {
-    // Object Pool
-    private ObjectPool objectPool;
-    public ObjectPool ObjectPool { get { return objectPool; } }
-
-    // Message bus
-    public MessageBus MessageBus { get; private set; }
-
     private Pause pauseScript;
+
+    public int GamesCountPlayed { get; private set;}
+    private bool IsFirstTimePlayed { get { return GamesCountPlayed == 1; } }
         
     public enum GamePlayState
     {
@@ -61,99 +58,23 @@ public class GameController : MonoBehaviour
 	// Use this for initialization
 	void Start () 
     {
-        // Message bus
-        MessageBus = new MessageBus();
-        
-        // Pool
-        objectPool = new ObjectPool();
-
-        //HideAllPanels();
-        
         // Pause script
         pauseScript = GetComponent<Pause>();
         
+        // update games count played 
+        GamesCountPlayed = PlayerPrefs.GetInt(GameConsts.Settings.GamesCountPlayed, 0);
+        PlayerPrefs.SetInt(GameConsts.Settings.GamesCountPlayed, ++GamesCountPlayed);
+
         // Show help panel if it is played for first time
-        var firstTimePlay = PlayerPrefs.GetInt(GameConsts.Settings.FirstTimePlay, 1);
-        if (firstTimePlay != 0)
+        if (IsFirstTimePlayed)
         {
             SetGamePlayState(GamePlayState.Help);
-            
-            // Set setting that game is already played
-            PlayerPrefs.SetInt(GameConsts.Settings.FirstTimePlay, 0);
         }
-        else
+        else // show 3,2,1
         {
             SetGamePlayState(GamePlayState.Countdown);
         }
-       
 	}
-	
-	// Update is called once per frame
-	void Update () 
-    {
-	  
-	}
-
-    void OnLevelWasLoaded(int level)
-    {
-        //if (level == 13)
-        print("Woohoo OnLevelWasLoaded");
-
-    }
-
-    #region Object Pool
-
-    public void RecycleGameObject(GameObject gameObject)
-    {
-        string tag = gameObject.tag ?? gameObject.name;
-        //int objectsInPoolCount = ObjectPool.GetObjectsCountByTag(tag);
-        //if (objectsInPoolCount > objectsInPoolByTagMaxCount)
-        //{
-        //    Destroy(gameObject);
-        //}
-        //else
-        //{
-        //    ObjectPool.AddObjectToPool(tag, gameObject);
-        //}
-    }
-
-    public void GetGameObjectFromPoolOrCreate(string tag)
-    {
-        //var obj = ObjectPool.GetObjectFromPool(tag);
-        //if (obj == null)
-        //{
-        //    switch (tag)
-        //    {
-        //        case GameObjectTagNames.Apple:
-        //            break;
-
-        //        case GameObjectTagNames.Bomb:
-        //            break;
-
-        //    }
-        //}
-    }
-
-    #endregion
-
-    #region Collectibles
-
-    public IEnumerator SpawnCollectibles()
-    {
-        yield return null;
-    }
-       
-
-    #endregion
-
-    #region GUI Panels
-
-    // Is not used 
-    private void ShowPauseMenuPanel()
-    {
-        var pauseMenuPanel = GameObject.Find("Pause Menu Panel");
-        NGUITools.SetActive(pauseMenuPanel, true);
-    }
 
     private void ShowHelpPanel()
     {
@@ -161,49 +82,7 @@ public class GameController : MonoBehaviour
         var helpPanels = panels.Where(item => item.name == "Help Panel");
         var helpPanel = helpPanels.First();
         NGUITools.SetActive(helpPanel.gameObject, true);
-        //var tweens = helpPanel.GetComponents<UITweener>();
-        //tweens.
     }
-
-    private void ShowLeaderboardPanel()
-    {
-        //var leaderboardPanelObject = GameObjectFinder.Find("Leaderboard Panel", true);
-        leaderboardPanel.SetActive(true);
-    }
-
-    private void ShowPanel()
-    {
-        
-    }
-
-    private void HidePanel()
-    {
-
-    }
-
-    private void HideAllPanels()
-    {
-        var uiRoot = GameObject.Find("UI Root");
-        // Take all panels except ui root panel
-        var panels = uiRoot.GetComponentsInChildren<UIPanel>().Skip(1);
-        
-        foreach (var item in panels)
-        {
-            NGUITools.SetActive(item.gameObject, false);
-        }
-    }
-
-    private void ShowHideButtons(bool show)
-    {
-        var buttons = GameObjectFinder.FindObjectsOfType<UIButton>(true);
-
-        foreach (var item in buttons)
-        {
-            NGUITools.SetActive(item.gameObject, show);
-        }
-    }
-
-    #endregion
 
     #region Game States
 
@@ -395,70 +274,32 @@ public class GameController : MonoBehaviour
 
         yield return new WaitForSeconds(1);
 
-        // Pause movement objects such as trees
-        //HandlePauseState();
-
         // Compare current score result with saved
         var scoreBarObject = GameObject.Find("Score Bar");
         ScoreBar scoreBar = scoreBarObject.GetComponent<ScoreBar>();
         var currentPlayerScore = scoreBar.CurrentScore;
 
         int bestPlayerScore = PlayerPrefs.GetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
-
+        
         if (currentPlayerScore > bestPlayerScore)
         {
-            // Save global score and show leaderboard
+            // Save global score and show leaderboard if player is playing first time
             if (Social.localUser.authenticated)
             {
-                Social.ReportScore(currentPlayerScore, GameConsts.GeneralLeaderboardID, PlayerScoreReportedHandler);
-            }
-            else // Save local score
-            {
-                PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, currentPlayerScore);
-            }
-        }
-        // Show ads
-        else
-        {
-            ShowAdOrRestartGame();
-        }
-    }
-
-    void PlayerScoreReportedHandler(bool result)
-    {
-        if (result)
-        {
-            print("Score reported");
-            var scoreBar = GameObject.Find("Score Bar").GetComponent<ScoreBar>();
-            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerGlobalScore, scoreBar.CurrentScore);
-            
-            // Get local user score in leaderboard
-            var leaderboard = Social.CreateLeaderboard();
-            leaderboard.id = GameConsts.GeneralLeaderboardID;
-            leaderboard.SetUserFilter(new[] { Social.localUser.id });
-            leaderboard.LoadScores(r => 
-            {
-                // Show panel if user exists in leaderboard
-                if (r)
+                Social.ReportScore(currentPlayerScore, GameConsts.GeneralLeaderboardID, result =>
                 {
-                    if (leaderboard.scores != null && leaderboard.scores.Count() > 0)
+                    if (IsFirstTimePlayed)
                     {
-                        ShowLeaderboardPanel();
-                    }
-                }
-                else
-                {
-                    print("Failed to load local user score");
-                    // Just Restart Game in case of error
-                    ShowAdOrRestartGame();
-                }
-            });
+                        ((PlayGamesPlatform)Social.Active).ShowLeaderboardUI(GameConsts.GeneralLeaderboardID);
+                    }    
+                });
+            }
+
+            // Save local score
+            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, currentPlayerScore);
         }
-        else
-        {
-            print("Failed to report score");
-            ShowAdOrRestartGame();
-        }
+        
+        ShowAdOrRestartGame();
     }
 
     void ad_Closed(object sender, EventArgs e)
