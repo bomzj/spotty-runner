@@ -7,14 +7,15 @@ namespace Assets.Scripts.Consts
 {
     public class GameConsts
     {
-        public const string GeneralLeaderboardID = "CgkIkYy7-sYWEAIQAA";
+        public const string TheBestGiraffeLeaderboardID = "CgkIkYy7-sYWEAIQAA";
         
 
         public class Settings
         {
             public const string BestPlayerLocalScore = "BestPlayerLocalScore";
             public const string BestPlayerGlobalScore = "BestPlayerGlobalScore";
-            public const string GamesCountPlayed = "GamesCountPlayed";
+            public const string TimesReplayed = "GamesCountPlayed";
+            public const string SoundEnabled = "SoundEnabled";
         }
     }
 }

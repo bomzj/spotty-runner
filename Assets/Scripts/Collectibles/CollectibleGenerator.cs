@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-using Assets.Scripts;
-using SuslikGames.SpottyRunner.Assets.Scripts.Classes.Extensions;
 using SuslikGames.SpottyRunner.Assets.Scripts.Classes.Definitions.Collectible;
-using SuslikGames.SpottyRunner.Assets.Scripts.Classes.Utils;
 using SuslikGames.SpottyRunner.Classes.Extensions;
 using SuslikGames.SpottyRunner.Classes.Definitions;
 
@@ -28,7 +24,7 @@ namespace SuslikGames.SpottyRunner
 
         private System.Random random = new System.Random(DateTime.Now.Millisecond);
 		private List<Transform[]> lastCollectibleWaves = new List<Transform[]>();
-        public int lastCollectibleWavesCount = 1;
+        public int lastCollectibleWavesCount = 3;
 
         private TreeGenerator treeGenerator;
         private Transform[] lastTrees = new Transform[CollectibleRows];
@@ -118,7 +114,7 @@ namespace SuslikGames.SpottyRunner
         private float GetBombProbabilityForRow(List<CollectibleType[]> lastWaves, CollectibleType[] nextWave, int row, float time)
         {
             // Merge last rows with next for bomb line detection 
-            // if merged line is full filled up with bombs so there is no possibility to spawn one more
+            // if merged line is full filled up with bombs then there is no possibility to spawn one more
             CollectibleType[] mergedWave = new CollectibleType[3];
             for (int j = 0; j < lastCollectibleWavesCount; j++)
             {
@@ -141,7 +137,7 @@ namespace SuslikGames.SpottyRunner
             float bombProbability = 0;
             if (!bombLine)
             {
-                bombProbability = Mathf.Clamp(0.01f * time, 0, 0.6f);
+                bombProbability = Mathf.Clamp(0.01f * time, 0, 0.4f);
             }
           
             return bombProbability;

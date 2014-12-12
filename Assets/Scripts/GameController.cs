@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
-using Assets.Scripts.Classes.Models;
 using Assets.Scripts.Classes.Core;
 using System;
 using Assets.Scripts.Classes.Utils;
 using Assets.Scripts.Ads;
 using Assets.Scripts.Consts;
 using GooglePlayGames;
+using Assets.Scripts.Core;
 
 /// <summary>
 /// Gameplay state/controller/screen
@@ -53,17 +53,16 @@ public class GameController : MonoBehaviour
 
     public event EventHandler GamePlayStateChanged;
 
-    public GameObject leaderboardPanel;
+    public AudioClip backgroundMusic;
 
-	// Use this for initialization
 	void Start () 
     {
         // Pause script
         pauseScript = GetComponent<Pause>();
         
         // update games count played 
-        GamesCountPlayed = PlayerPrefs.GetInt(GameConsts.Settings.GamesCountPlayed, 0);
-        PlayerPrefs.SetInt(GameConsts.Settings.GamesCountPlayed, ++GamesCountPlayed);
+        GamesCountPlayed = PlayerPrefs.GetInt(GameConsts.Settings.TimesReplayed, 0);
+        PlayerPrefs.SetInt(GameConsts.Settings.TimesReplayed, ++GamesCountPlayed);
 
         // Show help panel if it is played for first time
         if (IsFirstTimePlayed)
@@ -73,6 +72,11 @@ public class GameController : MonoBehaviour
         else // show 3,2,1
         {
             SetGamePlayState(GamePlayState.Countdown);
+        }
+
+        if (!AudioManager.Instance.IsMusicPlaying(backgroundMusic))
+        {
+            AudioManager.Instance.PlayMusic(backgroundMusic, 0.3f);
         }
 	}
 
@@ -212,6 +216,24 @@ public class GameController : MonoBehaviour
             // Fade scene to clear
             var fadeScene = GetComponent<FadeScene>();
             fadeScene.FadeToClear();
+
+            var test1 = AudioManager.Instance.IsMusicPlaying(backgroundMusic);
+
+            // resume sounds and music
+            AudioManager.Instance.ResumeAllSounds();
+
+            var test2 = AudioManager.Instance.IsMusicPlaying(backgroundMusic);
+
+            // Start music if it was disabled previously
+            if (!AudioManager.Instance.IsMusicPlaying(backgroundMusic))
+            {
+                AudioManager.Instance.PlayMusic(backgroundMusic);
+            }
+        }
+        else
+        {
+            // Increase music volume 
+            AudioManager.Instance.SetVolume(backgroundMusic, 1);
         }
 
         // show gui buttons
@@ -240,6 +262,10 @@ public class GameController : MonoBehaviour
         // Fade scene to back
         var fadeScene = GetComponent<FadeScene>();
         fadeScene.FadeToBlack();
+
+        // Pause music
+        AudioManager.Instance.PauseAllSounds();
+
         print("Game paused");
     }
 
@@ -254,6 +280,9 @@ public class GameController : MonoBehaviour
 
     IEnumerator StartGameOverState()
     {
+        // Stop music
+        AudioManager.Instance.StopSound(backgroundMusic);
+
         // Hide collectibles 
         GameObject.Find("Collectibles").SetActive(false);
         
@@ -272,8 +301,6 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(3);
         gameOverLabelObject.SetActive(false);
 
-        yield return new WaitForSeconds(1);
-
         // Compare current score result with saved
         var scoreBarObject = GameObject.Find("Score Bar");
         ScoreBar scoreBar = scoreBarObject.GetComponent<ScoreBar>();
@@ -286,11 +313,11 @@ public class GameController : MonoBehaviour
             // Save global score and show leaderboard if player is playing first time
             if (Social.localUser.authenticated)
             {
-                Social.ReportScore(currentPlayerScore, GameConsts.GeneralLeaderboardID, result =>
+                Social.ReportScore(currentPlayerScore, GameConsts.TheBestGiraffeLeaderboardID, result =>
                 {
                     if (IsFirstTimePlayed)
                     {
-                        ((PlayGamesPlatform)Social.Active).ShowLeaderboardUI(GameConsts.GeneralLeaderboardID);
+                        ((PlayGamesPlatform)Social.Active).ShowLeaderboardUI(GameConsts.TheBestGiraffeLeaderboardID);
                     }    
                 });
             }

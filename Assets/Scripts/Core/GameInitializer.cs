@@ -1,14 +1,9 @@
 ﻿using Assets.Scripts.Ads;
 using Assets.Scripts.Ads.Fake;
 using Assets.Scripts.Classes.Core;
-using Assets.Scripts.Classes.Models;
 using Assets.Scripts.Consts;
-using Assets.Scripts.Score;
+using Assets.Scripts.Core;
 using GooglePlayGames;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace Assets.Scripts.Classes
@@ -42,7 +37,6 @@ namespace Assets.Scripts.Classes
         {
             ServiceLocator.AddService(new ObjectPool());
             ServiceLocator.AddService(new MessageBus());
-            ServiceLocator.AddService(new ScoreManager());
             ServiceLocator.AddService(new AdsManager(new FakeAdsProvider()));
             Debug.Log("Game services initialized");
         }
@@ -56,13 +50,22 @@ namespace Assets.Scripts.Classes
             PlayGamesPlatform.Activate();
 
             // Reset score
-            PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
+            //PlayerPrefs.SetInt(GameConsts.Settings.BestPlayerLocalScore, 0);
             
             // Reset games count played
             //PlayerPrefs.SetInt(GameConsts.Settings.GamesCountPlayed, 0);
-            
-            AudioListener.volume = 1;
-           
+
+            // Init Audio Manager settings
+            int soundEnabled = PlayerPrefs.GetInt(GameConsts.Settings.SoundEnabled, 1);
+            AudioManager.Instance.ToggleSoundOnOff(soundEnabled == 1);
+            AudioManager.Instance.MusicVolume = 1;
+            AudioManager.Instance.SoundVolume = 1;
+            AudioManager.Instance.MasterVolume = 1;
+            DontDestroyOnLoad(AudioManager.Instance.gameObject);
+
+            // Limit temporarily frame rate to make trailer 
+            //Application.targetFrameRate = 30;
+            //QualitySettings.vSyncCount = 0;
         }
     }
 }

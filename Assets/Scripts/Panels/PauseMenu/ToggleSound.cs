@@ -1,20 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Scripts.Core;
 
 public class ToggleSound : MonoBehaviour {
     UIToggle toggleSoundButton;
 
+    private bool soundUIToggleActivated;
+
 	// Use this for initialization
 	void Awake () {
         toggleSoundButton = GetComponent<UIToggle>();
-        toggleSoundButton.value = AudioListener.volume > 0;
+        toggleSoundButton.value = AudioManager.Instance.SoundEnabled;
         EventDelegate.Add(toggleSoundButton.onChange, OnChange);
 	}
 
     void OnChange()
     {
-        AudioListener.volume = toggleSoundButton.value ? 1 : 0;
-        print("Toggle sound value " + toggleSoundButton.value.ToString());
-        
+        // hack : ngui UIToggle.onChange is called at startup, so if it is the first we just ignore sound toggle
+        if (soundUIToggleActivated)
+        {
+            AudioManager.Instance.ToggleSoundOnOff();
+            //toggleSoundButton.value = AudioManager.Instance.SoundEnabled;
+        }
+        soundUIToggleActivated = true;
     }
 }

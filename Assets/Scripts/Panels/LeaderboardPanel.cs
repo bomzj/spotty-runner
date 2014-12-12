@@ -34,7 +34,7 @@ namespace Assets.Scripts.Panels
 
             if (Social.localUser.authenticated)
             {
-                Social.LoadScores(GameConsts.GeneralLeaderboardID, ScoresLoadedHandler);
+                Social.LoadScores(GameConsts.TheBestGiraffeLeaderboardID, ScoresLoadedHandler);
                 UpdateLoadingMessage("Loading scores...");
             }
             else
@@ -84,7 +84,7 @@ namespace Assets.Scripts.Panels
             {
                 Debug.Log("Authenticated, loading scores");
                 UpdateLoadingMessage("Loading scores...");
-                Social.LoadScores(GameConsts.GeneralLeaderboardID, ScoresLoadedHandler);
+                Social.LoadScores(GameConsts.TheBestGiraffeLeaderboardID, ScoresLoadedHandler);
             }
             else
             {

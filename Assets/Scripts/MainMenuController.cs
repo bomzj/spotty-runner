@@ -1,30 +1,32 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
-using Assets.Scripts.Classes.Utils;
-using Assets.Scripts.Score.Facebook;
-using Assets.Scripts.Score;
 using GooglePlayGames;
 using Assets.Scripts.Consts;
+using Assets.Scripts.Core;
 
 public class MainMenuController : MonoBehaviour 
 {
     private UIButton leaderboardButton;
+    private UIButton achievementsButton;
     private UIToggle toggleSoundButton;
     private UILabel welcomeLabel;
+
+    public AudioClip backgroundMusic;
 
 	// Use this for initialization
 	void Start () {
         leaderboardButton = GameObject.Find("Leaderboard Button").GetComponent<UIButton>();
-        toggleSoundButton = GameObject.Find("Toggle Sound Button").GetComponent<UIToggle>();
-        toggleSoundButton.value = AudioListener.volume > 0;
+        achievementsButton = GameObject.Find("Achievements Button").GetComponent<UIButton>();
+        //toggleSoundButton = GameObject.Find("Toggle Sound Button").GetComponent<UIToggle>();
+        //toggleSoundButton.value = AudioManager.Instance.SoundEnabled;
         welcomeLabel = GameObject.Find("Welcome Title").GetComponent<UILabel>();
         UpdateUI();
+        
+        AudioManager.Instance.PlayMusic(backgroundMusic, 0.3f);
 	}
 
     void UpdateUI()
     {
-        leaderboardButton.isEnabled = Social.localUser.authenticated;
+        leaderboardButton.isEnabled = achievementsButton.isEnabled = Social.localUser.authenticated;
         welcomeLabel.enabled = Social.localUser.authenticated;
         welcomeLabel.text = string.Format("Welcome, {0}!", Social.localUser.userName);
     }
@@ -46,7 +48,7 @@ public class MainMenuController : MonoBehaviour
 
     public void ShowLeaderboard()
     {
-        ((PlayGamesPlatform)Social.Active).ShowLeaderboardUI(GameConsts.GeneralLeaderboardID);
+        ((PlayGamesPlatform)Social.Active).ShowLeaderboardUI(GameConsts.TheBestGiraffeLeaderboardID);
     }
 
     public void ShowAchievements()
@@ -54,10 +56,14 @@ public class MainMenuController : MonoBehaviour
         Social.ShowAchievementsUI();
     }
 
-    public void ToggleSound()
-    {
-        AudioListener.volume = toggleSoundButton.value ? 1 : 0;
-        print("toggle sound " + toggleSoundButton.value.ToString());
-    }
+    //public void ToggleSound()
+    //{
+    //    // hack : ngui UIToggle is called at startup, so if it is the first we just ignore sound toggle
+    //    if (soundUIToggleActivated)
+    //    {
+    //        AudioManager.Instance.ToggleSoundOnOff();
+    //    }
+    //    soundUIToggleActivated = true;
+    //}
 
 }

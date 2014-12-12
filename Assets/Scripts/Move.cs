@@ -10,12 +10,11 @@ namespace SuslikGames.SpottyRunner
     {
         public Vector2 speed = new Vector2(-3f, 0);
 
-        #region Unity Callbacks
-
         // Use this for initialization
         void Start()
         {
-            
+            //Application.targetFrameRate = 30;
+            //QualitySettings.vSyncCount = 0;
         }
 
         // Update is called once per frame
@@ -24,7 +23,5 @@ namespace SuslikGames.SpottyRunner
             Vector3 movement = speed * Time.deltaTime;
             this.transform.Translate(movement);
         }
-
-        #endregion 
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using SuslikGames.SpottyRunner.Classes.Definitions;
 using System;
+using Assets.Scripts.Core;
 
 /// <summary>
 /// Handle player input, managing Giraffe states
@@ -18,7 +19,10 @@ public class Giraffe : MonoBehaviour
     public Sprite highGiraffe;
     public Sprite middleGiraffe;
     public Sprite lowGiraffe;
-    
+
+    public AudioClip bombExplosionSound;
+    public AudioClip appleCrunchSound;
+
     private GiraffeHeight currentGiraffeHeight = GiraffeHeight.Low;
 
     private SpriteRenderer bodyRenderer;
@@ -83,7 +87,7 @@ public class Giraffe : MonoBehaviour
         if (isTouched && UICamera.hoveredObject == null)
         {
             Vector3 worldMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            print(string.Format("Mouse position is ({0},{1})", worldMousePosition.x, worldMousePosition.y));
+            //print(string.Format("Mouse position is ({0},{1})", worldMousePosition.x, worldMousePosition.y));
             
             GiraffeHeight height = GiraffeHeight.Low;
 
@@ -165,6 +169,7 @@ public class Giraffe : MonoBehaviour
         ScoreBar.AddScore(1);
         Destroy(apple);
         PlayEatAnimation();
+        AudioManager.Instance.PlaySound(appleCrunchSound);
     }
 
     private void CollectBomb(GameObject bomb)
@@ -173,6 +178,7 @@ public class Giraffe : MonoBehaviour
         HideGiraffe();
         PlayExplodeAnimation();
         gameController.GameOver();
+        AudioManager.Instance.PlaySound(bombExplosionSound);
     }
 
     private void PlayRunAnimation()
