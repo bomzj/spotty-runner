@@ -9,6 +9,8 @@ namespace Assets.Scripts.Ads
     {
         private IAdsProvider provider;
 
+        public static IAdsProvider Current { get; private set; }
+
         public AdsManager(IAdsProvider provider)
         {
             this.provider = provider;

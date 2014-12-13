@@ -37,15 +37,13 @@ namespace Assets.Scripts.Classes
         {
             ServiceLocator.AddService(new ObjectPool());
             ServiceLocator.AddService(new MessageBus());
-            ServiceLocator.AddService(new AdsManager(new FakeAdsProvider()));
+            //ServiceLocator.AddService(new AdsManager(new FakeAdsProvider()));
+            ServiceLocator.AddService(new AdsManager(ChartboostAdsProvider.Instance));
             Debug.Log("Game services initialized");
         }
 
         private void InitializeGameSettings()
         {
-            // recommended for debugging:
-            PlayGamesPlatform.DebugLogEnabled = true;
-
             // Activate the Google Play Games platform
             PlayGamesPlatform.Activate();
 

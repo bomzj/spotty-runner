@@ -331,7 +331,15 @@ public class GameController : MonoBehaviour
 
     void ad_Closed(object sender, EventArgs e)
     {
+        var ad = sender as IAd;
+        if (ad != null)
+        {
+            // remove event handler
+            ad.Closed -= ad_Closed;
+        }
+
         print("ad_Closed");
+
         // Send message to restart game or restart game
         RestartGame();
     }
