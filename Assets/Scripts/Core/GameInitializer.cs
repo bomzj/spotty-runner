@@ -44,6 +44,8 @@ namespace Assets.Scripts.Classes
 
         private void InitializeGameSettings()
         {
+            PlayGamesPlatform.DebugLogEnabled = true;
+
             // Activate the Google Play Games platform
             PlayGamesPlatform.Activate();
 
