@@ -31,13 +31,9 @@ Spotty Runner is an endless runner game that was initially conceived in February
 
 In Spotty Runner, you take control of a giraffe and guide it through an endless journey filled with apples and bombs. Your objective is to collect as many apples as possible while avoiding the bombs. The apples are placed at three different height levels, requiring you to adjust the giraffe's neck length to reach them. Be cautious and react swiftly to avoid the bombs, as colliding with them will end the game. Challenge yourself to achieve the highest score and climb the leaderboards!
 
-## Installation
+## Setup
 
-To play Spotty Runner, follow these simple steps:
-
-1. [Download the game](#) from the official website.
-2. Extract the downloaded archive to your desired location.
-3. Launch the game executable.
+Ensure that you have the Unity 5 installed on your computer.
 
 ## How to Play
 
