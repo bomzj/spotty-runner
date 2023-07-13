@@ -6,7 +6,7 @@ Spotty Runner is an exciting runner game featuring a cute giraffe on a mission t
 
 ## Trailer
 
-[![Spotty Runner Trailer](https://www.youtube.com/watch?v=PyehuyNygQU)](https://github.com/bomzj/spotty-runner/assets/2025775/c837b489-da93-4245-b05e-0fbb329470fa)
+[![Spotty Runner Trailer](http://img.youtube.com/vi/PyehuyNygQU/0.jpg)](https://www.youtube.com/watch?v=PyehuyNygQU)
 
 ## Table of Contents
 - [Introduction](#introduction)
